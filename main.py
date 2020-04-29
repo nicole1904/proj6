@@ -1,10 +1,37 @@
+import csv
 import PySimpleGUI as sg
 
+
+class Movie:
+    def __init__(self, movie_id, year, name):
+        self.movie_id = movie_id
+        self.year = int(year)
+        self.name = name
+
+class Movies:
+    def __init__(self):
+        self.movies = {}
+
+    def load_movies(self, file_location):
+        with open(file_location, newline='') as csvfile:
+            reader = csv.reader(csvfile, delimiter=',')
+            for row in reader:
+                movie_id = row[0]
+                self.movies[movie_id] = Movie(movie_id, *row[1:])
+
 class Application:
+
+    MOVIE_RATINGS_FILE = "data.csv"
+
     def __init__(self):
         self.window = None
         self.recommender = None
         self.movies = None
+
+    def _load_data(self):
+
+        self.movies = Movies()
+        self.movies.load_movies(self.MOVIE_LIST_FILE)
 
     def run(self):
         layout = [
@@ -13,6 +40,16 @@ class Application:
         ]
         self.window = sg.Window("Recommender", layout)
 
+        try:
+            self._load_data()
+        except FileNotFoundError:
+            sg.popup("ERROR", "Movie titles file '%s' or movie ratings file '%s' not found!" % self.MOVIE_LIST_FILE)
+            self.window.close()
+            exit(1)
+        except Exception:
+            sg.popup("ERROR", "Loading failed. Please check input files.")
+            self.window.close()
+            exit(1)
 
         while True:
             event, values = self.window.read()
