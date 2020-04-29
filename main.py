@@ -1,6 +1,10 @@
 import PySimpleGUI as sg
 
 class Application:
+    def __init__(self):
+        self.window = None
+        self.recommender = None
+        self.movies = None
 
     def run(self):
         layout = [
