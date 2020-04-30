@@ -19,10 +19,20 @@ class Movies:
                 movie_id = row[0]
                 self.movies[movie_id] = Movie(movie_id, *row[1:])
 
+    def get_movie(self, movie_id):
+        if movie_id in self.movies:
+            return self.movies[movie_id]
+        return None
+
 class Application:
 
     MOVIE_RATINGS_FILE = "data.csv"
     MOVIE_LIST_FILE = "movie_titles.csv"
+
+    def __init__(self):
+        self.window = None
+        self.recommender = None
+        self.movies = None
 
     def _load_data(self):
          self.recommender = Recommender()
@@ -30,6 +40,10 @@ class Application:
 
          self.movies = Movies()
          self.movies.load_movies(self.MOVIE_LIST_FILE)
+
+    def _show_result(self, user_id):
+        rows = ["Recommended movies for user %s:" % user_id, "=" * 40]
+        self.window["-OUTPUT-"].update("\n".join(rows))
 
     def run(self):
         layout = [
@@ -56,8 +70,7 @@ class Application:
                 break
 
             if event == "OK":
-                pass
-                # something something
+                self._show_result(values[0])
 
 
         self.window.close()
