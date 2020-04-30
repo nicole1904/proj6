@@ -1,6 +1,6 @@
 import csv
 import PySimpleGUI as sg
-
+from recommender import Recommender
 
 class Movie:
     def __init__(self, movie_id, year, name):
@@ -22,16 +22,14 @@ class Movies:
 class Application:
 
     MOVIE_RATINGS_FILE = "data.csv"
-
-    def __init__(self):
-        self.window = None
-        self.recommender = None
-        self.movies = None
+    MOVIE_LIST_FILE = "movie_titles.csv"
 
     def _load_data(self):
+         self.recommender = Recommender()
+         self.recommender.load_data(self.MOVIE_RATINGS_FILE)
 
-        self.movies = Movies()
-        self.movies.load_movies(self.MOVIE_LIST_FILE)
+         self.movies = Movies()
+         self.movies.load_movies(self.MOVIE_LIST_FILE)
 
     def run(self):
         layout = [
@@ -43,7 +41,8 @@ class Application:
         try:
             self._load_data()
         except FileNotFoundError:
-            sg.popup("ERROR", "Movie titles file '%s' or movie ratings file '%s' not found!" % self.MOVIE_LIST_FILE)
+            sg.popup("ERROR", "Movie titles file '%s' or movie ratings file '%s' not found!" % (
+            self.MOVIE_LIST_FILE, self.MOVIE_RATINGS_FILE))
             self.window.close()
             exit(1)
         except Exception:
