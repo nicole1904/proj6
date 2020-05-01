@@ -1,6 +1,6 @@
 import csv
 import PySimpleGUI as sg
-from recommender import Recommender
+from recommender import Recommender, Recommendation
 
 class Movie:
     def __init__(self, movie_id, year, name):
@@ -42,8 +42,20 @@ class Application:
          self.movies.load_movies(self.MOVIE_LIST_FILE)
 
     def _show_result(self, user_id):
-        rows = ["Recommended movies for user %s:" % user_id, "=" * 40]
-        self.window["-OUTPUT-"].update("\n".join(rows))
+        self.window["-OUTPUT-"].update("")
+        try:
+            r = Recommendation(self.recommender, user_id)
+            r.recommend()
+            rows = ["Recommended movies for user %s:" % user_id, "=" * 40]
+            self.window["-OUTPUT-"].update("\n".join(rows))
+
+        except AttributeError as e:
+            print(e)
+            sg.popup("ERROR", "User %s not found in review list" % user_id)
+        except Exception as e:
+            print("ERROR: %s" % e)
+            sg.popup("Recommendation failed. Invalid data format.")
+            raise e
 
     def run(self):
         layout = [
@@ -71,7 +83,6 @@ class Application:
 
             if event == "OK":
                 self._show_result(values[0])
-
 
         self.window.close()
 
