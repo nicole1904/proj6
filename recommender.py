@@ -73,10 +73,33 @@ class Recommendation:
         print(self.similar_users)
 
     def _recommend_movies(self): #movie recommender
-        pass
+        similar_users_df = pd.DataFrame()
+        similarities = []
+        for user_id, user_similarity in self.similar_users:
+            similar_users_df = similar_users_df.append(self.recomm.data.loc[user_id])
+            similarities.append(user_similarity)
+        similar_users_df["similarity"] = similarities
+        print(similar_users_df.head())
+
+        denominator = sum([user_similarity for user_id, user_similarity in self.similar_users])
+        movie_i = 0
+        movies_to_recommend = []
+
+        for x in self.selected_user:
+            movie_id = self.recomm.data.columns[movie_i]
+            totalsum = 0
+            if x == 0.0:  # user haven't seen this movie
+                for user_i in range(0, len(self.similar_users)):
+                    totalsum += similar_users_df[movie_id].iloc[user_i] * similar_users_df["similarity"].iloc[user_i]
+                if denominator != 0:
+                    movies_to_recommend.append([movie_id, totalsum / denominator])
+            movie_i += 1
+
+        movies_to_recommend.sort(key=lambda r: r[1], reverse=True)
+        return movies_to_recommend
 
     def recommend(self):
         #debug
         print("Recommending movies for user: %s" % self.user_id)
         self._find_similar_users()
-        self._recommend_movies()
+        return self._recommend_movies()

@@ -8,6 +8,9 @@ class Movie:
         self.year = int(year)
         self.name = name
 
+    def __str__(self):
+        return "[MovieID %s] %s (%s)" % (self.movie_id, self.name, self.year)
+
 class Movies:
     def __init__(self):
         self.movies = {}
@@ -45,8 +48,14 @@ class Application:
         self.window["-OUTPUT-"].update("")
         try:
             r = Recommendation(self.recommender, user_id)
-            r.recommend()
+            recommended_movies = r.recommend()
             rows = ["Recommended movies for user %s:" % user_id, "=" * 40]
+            for movie_id, _ in recommended_movies:
+                movie = self.movies.get_movie(movie_id)
+                if movie is None:
+                    rows.append("[MovieID %s] (movie not found in movie list)" % movie_id)
+                else:
+                    rows.append(str(movie))
             self.window["-OUTPUT-"].update("\n".join(rows))
 
         except AttributeError as e:
